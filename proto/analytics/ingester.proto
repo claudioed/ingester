@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package api.analytics.ingester;
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com.com/claudioed/ingester/pkg/pb/ingester/v1;ingester_v1";
+
+service Collect{
+  rpc Compute (ApiCall) returns (DataCollected) {}
+}
+
+message ApiCall {
+  string api = 1;
+  string path = 2;
+  string verb = 3;
+  string response_code = 4;
+  repeated Header request_headers = 5;
+  repeated Header response_headers = 6;
+  google.protobuf.Struct request_body = 7;
+  google.protobuf.Struct response_body = 8;
+  google.protobuf.Struct metadata = 9;
+  repeated string tags = 10;
+  google.protobuf.Timestamp start_time = 11;
+  google.protobuf.Timestamp end_time = 12;
+}
+
+message Header{
+  string header = 1;
+  string value = 2;
+}
+
+message DataCollected{
+  string uuid = 1;
+}
