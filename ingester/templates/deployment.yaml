@@ -37,6 +37,9 @@ spec:
             - secretRef:
                 name: {{ include "ingester.fullname" . }}
                 optional: false
+            - configMapRef:
+                name: {{ include "ingester.fullname" . }}
+                optional: false
           ports:
             - name: grpc
               containerPort: 50051
