@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "ingester.fullname" . }}
+  labels:
+    {{- include "ingester.labels" . | nindent 4 }}
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - analytics-grpc-gateway
+  http:
+    - match:
+        - port: 80
+      route:
+        - destination:
+            host: ingester
+            subset: v1
+          weight: 100

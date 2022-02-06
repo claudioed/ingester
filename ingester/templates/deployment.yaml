@@ -4,6 +4,8 @@ metadata:
   name: {{ include "ingester.fullname" . }}
   labels:
     {{- include "ingester.labels" . | nindent 4 }}
+    app: ingester
+    version: v1
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -19,6 +21,8 @@ spec:
       {{- end }}
       labels:
         {{- include "ingester.selectorLabels" . | nindent 8 }}
+        app: ingester
+        version: v1
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
