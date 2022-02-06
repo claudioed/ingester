@@ -34,3 +34,8 @@ docker-build:
 .PHONY: docker-push
 docker-push:
 	docker push claudioed/ingester:latest
+
+install-kind-local:
+	kubectl create ns analytics
+	kubectl label namespace analytics istio-injection=enabled --overwrite
+	helm install ingester ingester -n analytics
