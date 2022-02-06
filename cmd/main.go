@@ -40,7 +40,7 @@ func main() {
 		logger.Panic("Failed to create index ES", zap.Error(errES))
 	}
 	repo := repository.NewElasticApiCallRepository(elastic)
-	collectorHandler := svc.NewCollectorService(repo)
+	collectorHandler := svc.NewCollectorService(repo, logger)
 	healthHandler := svc.NewHealthService()
 
 	// gRPC Server
