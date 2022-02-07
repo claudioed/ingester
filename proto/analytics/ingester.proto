@@ -23,6 +23,9 @@ message ApiCall {
   repeated string tags = 10;
   google.protobuf.Timestamp start_time = 11;
   google.protobuf.Timestamp end_time = 12;
+  string tenant_id = 13;
+  string region = 14;
+  string zone = 15;
 }
 
 message Header{

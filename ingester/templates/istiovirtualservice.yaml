@@ -7,8 +7,6 @@ metadata:
 spec:
   hosts:
     - "*"
-  gateways:
-    - analytics-grpc-gateway
   http:
     - match:
         - port: 80
