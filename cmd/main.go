@@ -6,8 +6,11 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"ingester/internal/infra/cloudevents"
 	"ingester/internal/infra/elastic"
+	"ingester/internal/infra/kafka"
 	"ingester/internal/repository"
+	sender2 "ingester/internal/sender"
 	"ingester/internal/svc"
 	ingester_v1 "ingester/pkg/pb/analytics"
 	"net"
@@ -33,14 +36,26 @@ func main() {
 		logger.Panic("Failed to connect ES", zap.Error(errES))
 	}
 
-	// Dependencies
+	// Elastic Dependencies
 	elastic := elastic.NewElasticSearch(escli)
 	errIdx := elastic.CreateIndex("api_calls")
 	if errIdx != nil {
 		logger.Panic("Failed to create index ES", zap.Error(errES))
 	}
+
+	// Kafka + CE Dependencies
+	sender, errSen := kafka.NewSender()
+	if errSen != nil {
+		logger.Panic("Failed to create sender", zap.Error(errES))
+	}
+	cec, errCe := cloudevents.NewCloudEventClientWithKafka(sender)
+	if errCe != nil {
+		logger.Panic("Failed to cloud events client", zap.Error(errES))
+	}
+	ks := sender2.NewKafkaAnalyticsSender(cec, logger)
+
 	repo := repository.NewElasticApiCallRepository(elastic)
-	collectorHandler := svc.NewCollectorService(repo, logger)
+	collectorHandler := svc.NewCollectorService(repo, logger, ks)
 	healthHandler := svc.NewHealthService()
 
 	// gRPC Server

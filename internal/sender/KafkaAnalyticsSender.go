@@ -8,15 +8,16 @@ import (
 	"github.com/cloudevents/sdk-go/v2/client"
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	ingester_v1 "ingester/pkg/pb/analytics"
-	"log"
 )
 
 type KafkaAnalyticsSender struct {
-	c client.Client
+	c      client.Client
+	logger *zap.Logger
 }
 
-func (receiver *KafkaAnalyticsSender) Send(ctx context.Context, call *ingester_v1.ApiCall) error {
+func (kas *KafkaAnalyticsSender) Send(ctx context.Context, call *ingester_v1.ApiCall) error {
 	evt := cloudevents.NewEvent()
 	evt.SetID(uuid.New().String())
 	evt.SetType("tech.claudioed.analytics.http.api")
@@ -28,18 +29,18 @@ func (receiver *KafkaAnalyticsSender) Send(ctx context.Context, call *ingester_v
 		return err
 	}
 	_ = evt.SetData(cloudevents.ApplicationJSON, js)
-	if result := receiver.c.Send(
+	if result := kas.c.Send(
 		kafka_sarama.WithMessageKey(context.Background(), sarama.StringEncoder(call.TenantId)),
 		evt,
 	); cloudevents.IsUndelivered(result) {
-		log.Printf("failed to send: %v", result)
+		kas.logger.Error("failed to send: %v", zap.Bool("evt.sent", cloudevents.IsACK(result)))
 	} else {
-		log.Printf("sent: %s, accepted: %t", evt.ID(), cloudevents.IsACK(result))
+		kas.logger.Info("sent: message", zap.String("evt.id", evt.ID()), zap.Bool("evt.sent", cloudevents.IsACK(result)))
 	}
 
 	return nil
 }
 
-func NewKafkaAnalyticsSender(c cloudevents.Client) *KafkaAnalyticsSender {
-	return &KafkaAnalyticsSender{c: c}
+func NewKafkaAnalyticsSender(c cloudevents.Client, logger *zap.Logger) *KafkaAnalyticsSender {
+	return &KafkaAnalyticsSender{c: c, logger: logger}
 }
