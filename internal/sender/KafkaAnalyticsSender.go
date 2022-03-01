@@ -35,7 +35,7 @@ func (kas *KafkaAnalyticsSender) Send(ctx context.Context, call *ingester_v1.Api
 	); cloudevents.IsUndelivered(result) {
 		kas.logger.Error("failed to send: %v", zap.Bool("evt.sent", cloudevents.IsACK(result)))
 	} else {
-		kas.logger.Info("sent: message", zap.String("evt.id", evt.ID()), zap.Bool("evt.sent", cloudevents.IsACK(result)))
+		kas.logger.Debug("sent: message", zap.String("evt.id", evt.ID()), zap.Bool("evt.sent", cloudevents.IsACK(result)))
 	}
 
 	return nil

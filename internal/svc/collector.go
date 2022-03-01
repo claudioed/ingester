@@ -16,7 +16,7 @@ type CollectorService struct {
 }
 
 func (cs *CollectorService) Compute(ctx context.Context, req *ingester_v1.ApiCall) (res *ingester_v1.DataCollected, err error) {
-	cs.logger.Info("Receiving Data...")
+	cs.logger.Debug("Receiving Data...")
 	id, err := cs.repo.Add(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("insert: request: %w", err)
@@ -26,7 +26,7 @@ func (cs *CollectorService) Compute(ctx context.Context, req *ingester_v1.ApiCal
 		return nil, fmt.Errorf("kafka: request: %w", err)
 	}
 	res = &ingester_v1.DataCollected{Uuid: *id}
-	cs.logger.Info("Data processed")
+	cs.logger.Debug("Data processed")
 	return res, nil
 }
 
